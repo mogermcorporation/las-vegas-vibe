@@ -38,12 +38,16 @@
 
       function App() {
         const [selectedVibe, setSelectedVibe] = useState('All');
-        const [showAuthGate, setShowAuthGate] = useState(false);
+        const [showAuthModal, setShowAuthModal] = useState(false);
+        const [authMode, setAuthMode] = useState('login'); // 'login' or 'signup'
         const [showCoachingModal, setShowCoachingModal] = useState(false);
         const [coachingStep, setCoachingStep] = useState(1);
         const [selectedPerson, setSelectedPerson] = useState(null);
 
-        // High-Energy, Aesthetic Profiles with Best Dressed Badges
+        // Form Inputs State
+        const [email, setEmail] = useState('');
+        const [password, setPassword] = useState('');
+
         const profiles = [
           {
             id: "1",
@@ -101,7 +105,20 @@
 
         const handleConnect = (person) => {
           setSelectedPerson(person);
-          setShowAuthGate(true);
+          setAuthMode('signup');
+          setShowAuthModal(true);
+        };
+
+        const handleAuthSubmit = (e) => {
+          e.preventDefault();
+          if (authMode === 'login') {
+            alert(`Welcome back! Logging in as ${email}...`);
+          } else {
+            alert(`Account created for ${email}! Welcome to Vegas Vibe.`);
+          }
+          setShowAuthModal(false);
+          setEmail('');
+          setPassword('');
         };
 
         return (
@@ -123,16 +140,24 @@
                 </p>
               </div>
 
-              {/* PROFILE COACHING CTA */}
-              <button 
-                onClick={() => { setCoachingStep(1); setShowCoachingModal(true); }}
-                style={{ backgroundColor: 'rgba(255, 215, 0, 0.15)', border: '1px solid #FFD700', borderRadius: '20px', padding: '6px 12px', color: '#FFD700', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }}
-              >
-                📸 Photo Studio
-              </button>
+              {/* AUTH & STUDIO ACTION BUTTONS */}
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button 
+                  onClick={() => { setAuthMode('login'); setShowAuthModal(true); }}
+                  style={{ backgroundColor: 'rgba(255, 0, 122, 0.15)', border: '1px solid #FF007A', borderRadius: '20px', padding: '6px 12px', color: '#FF007A', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }}
+                >
+                  🔑 Sign In
+                </button>
+                <button 
+                  onClick={() => { setCoachingStep(1); setShowCoachingModal(true); }}
+                  style={{ backgroundColor: 'rgba(255, 215, 0, 0.15)', border: '1px solid #FFD700', borderRadius: '20px', padding: '6px 12px', color: '#FFD700', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }}
+                >
+                  📸 Studio
+                </button>
+              </div>
             </header>
 
-            {/* HIGH-ENERGY VIBE CATEGORIES */}
+            {/* VIBE CATEGORIES */}
             <div className="custom-scroll" style={{ display: 'flex', gap: '8px', padding: '0 16px 16px 16px', overflowX: 'auto' }}>
               {['All', 'Nightlife & Clubs', 'Pool Parties', 'Casual & Chill', 'Food & Speakeasies', 'Casino & Lounges'].map(vibe => (
                 <button
@@ -224,7 +249,72 @@
               ))}
             </div>
 
-            {/* LOOK YOUR BEST PHOTO-COACHING MODAL */}
+            {/* DEDICATED AUTH / SIGN IN & SIGN UP MODAL */}
+            {showAuthModal && (
+              <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.92)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
+                <div style={{ backgroundColor: '#180B30', borderRadius: '28px', padding: '28px', maxWidth: '320px', width: '100%', textAlign: 'center', border: '2px solid #FF007A', boxShadow: '0 0 40px rgba(255,0,122,0.5)' }}>
+                  
+                  {/* AUTH MODE TOGGLE BUTTONS */}
+                  <div style={{ display: 'flex', backgroundColor: '#0A0118', borderRadius: '14px', padding: '4px', marginBottom: '20px', border: '1px solid #2D1454' }}>
+                    <button 
+                      onClick={() => setAuthMode('login')}
+                      style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', backgroundColor: authMode === 'login' ? '#FF007A' : 'transparent', color: '#FFF', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}
+                    >
+                      Sign In
+                    </button>
+                    <button 
+                      onClick={() => setAuthMode('signup')}
+                      style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', backgroundColor: authMode === 'signup' ? '#FF007A' : 'transparent', color: '#FFF', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}
+                    >
+                      New Profile
+                    </button>
+                  </div>
+
+                  <h2 style={{ margin: 0, color: '#FFF', fontSize: '20px', fontWeight: '900' }}>
+                    {authMode === 'login' ? 'WELCOME BACK' : 'JOIN LAS VEGAS VIBE'}
+                  </h2>
+                  <p style={{ color: '#FFD700', fontSize: '12px', fontWeight: 'bold', margin: '6px 0 20px 0' }}>
+                    {authMode === 'login' ? 'Log in to access your messages & beacons' : `Sign up free to connect with ${selectedPerson?.name || 'companions'}`}
+                  </p>
+
+                  <form onSubmit={handleAuthSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <input 
+                      type="email" 
+                      required 
+                      placeholder="Your Email" 
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      style={{ padding: '14px', borderRadius: '12px', border: '1px solid #33155C', backgroundColor: '#0A0118', color: '#FFF', fontSize: '13px', outline: 'none' }} 
+                    />
+                    <input 
+                      type="password" 
+                      required 
+                      placeholder="Your Password" 
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      style={{ padding: '14px', borderRadius: '12px', border: '1px solid #33155C', backgroundColor: '#0A0118', color: '#FFF', fontSize: '13px', outline: 'none' }} 
+                    />
+                    
+                    <button 
+                      type="submit" 
+                      style={{ padding: '14px', borderRadius: '14px', background: 'linear-gradient(90deg, #FF007A 0%, #00F0FF 100%)', color: '#FFF', border: 'none', fontWeight: '900', fontSize: '14px', cursor: 'pointer', marginTop: '4px', textTransform: 'uppercase' }}
+                    >
+                      {authMode === 'login' ? 'Log In Now →' : 'Create Free Profile →'}
+                    </button>
+                  </form>
+
+                  <button 
+                    onClick={() => setShowAuthModal(false)} 
+                    style={{ backgroundColor: 'transparent', border: 'none', color: '#888', fontSize: '12px', marginTop: '16px', cursor: 'pointer' }}
+                  >
+                    Cancel
+                  </button>
+
+                </div>
+              </div>
+            )}
+
+            {/* PHOTO-COACHING STUDIO MODAL */}
             {showCoachingModal && (
               <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.92)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
                 <div style={{ backgroundColor: '#180B30', borderRadius: '28px', padding: '28px', maxWidth: '340px', width: '100%', textAlign: 'center', border: '2px solid #FFD700', boxShadow: '0 0 40px rgba(255,215,0,0.3)' }}>
@@ -270,7 +360,7 @@
                       </button>
                     ) : (
                       <button 
-                        onClick={() => { setShowCoachingModal(false); setShowAuthGate(true); }}
+                        onClick={() => { setShowCoachingModal(false); setAuthMode('signup'); setShowAuthModal(true); }}
                         style={{ width: '100%', padding: '12px', borderRadius: '12px', background: 'linear-gradient(90deg, #FFD700 0%, #FF007A 100%)', color: '#000', border: 'none', fontWeight: '900', fontSize: '13px', cursor: 'pointer' }}
                       >
                         Create My Profile Now ✨
@@ -285,26 +375,6 @@
                     Close Studio
                   </button>
 
-                </div>
-              </div>
-            )}
-
-            {/* AUTH / SIGN-UP MODAL */}
-            {showAuthGate && (
-              <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.92)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
-                <div style={{ backgroundColor: '#180B30', borderRadius: '28px', padding: '28px', maxWidth: '320px', width: '100%', textAlign: 'center', border: '2px solid #FF007A' }}>
-                  <h2 style={{ margin: 0, color: '#FFF', fontSize: '20px', fontWeight: '900' }}>JOIN THE FUN</h2>
-                  <p style={{ color: '#FFD700', fontSize: '12px', fontWeight: 'bold', margin: '6px 0 16px 0' }}>
-                    Sign up free to connect with {selectedPerson?.name || 'companions'}!
-                  </p>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <input type="email" placeholder="Your Email" style={{ padding: '12px', borderRadius: '10px', border: '1px solid #33155C', backgroundColor: '#0A0118', color: '#FFF', fontSize: '13px', outline: 'none' }} />
-                    <input type="password" placeholder="Create Password" style={{ padding: '12px', borderRadius: '10px', border: '1px solid #33155C', backgroundColor: '#0A0118', color: '#FFF', fontSize: '13px', outline: 'none' }} />
-                    <button onClick={() => { alert('Welcome! Your profile is ready.'); setShowAuthGate(false); }} style={{ padding: '12px', borderRadius: '10px', background: 'linear-gradient(90deg, #FF007A 0%, #00F0FF 100%)', color: '#FFF', border: 'none', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer' }}>
-                      Create Free Account
-                    </button>
-                  </div>
-                  <button onClick={() => setShowAuthGate(false)} style={{ backgroundColor: 'transparent', border: 'none', color: '#888', fontSize: '12px', marginTop: '14px', cursor: 'pointer' }}>Close</button>
                 </div>
               </div>
             )}
