@@ -40,7 +40,7 @@
       function App() {
         const [selectedVibe, setSelectedVibe] = useState('All');
         const [showAuthModal, setShowAuthModal] = useState(false);
-        const [authMode, setAuthMode] = useState('login');
+        const [authMode, setAuthMode] = useState('login'); // 'login' or 'signup'
         const [showCoachingModal, setShowCoachingModal] = useState(false);
         const [coachingStep, setCoachingStep] = useState(1);
         const [selectedPerson, setSelectedPerson] = useState(null);
@@ -118,31 +118,79 @@
           }
         };
 
-        const handleAuthSubmit = (e) => {
+        // LIVE SUPABASE AUTH API INTEGRATION
+        const handleAuthSubmit = async (e) => {
           e.preventDefault();
+          
           if (authMode === 'login') {
-            alert(`Welcome back! Logged in as ${email}.`);
+            // Real Supabase Login Call
+            try {
+              const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+                method: 'POST',
+                headers: {
+                  'apikey': SUPABASE_ANON_KEY,
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+              });
+              const data = await res.json();
+              
+              if (data.access_token) {
+                alert(`Welcome back! Logged in as ${email}.`);
+                setShowAuthModal(false);
+              } else {
+                alert(data.error_description || data.msg || "Invalid login credentials.");
+              }
+            } catch (err) {
+              alert("Login failed. Please check your network and credentials.");
+            }
+
           } else {
-            // Add Newly Created Profile with Uploaded Photo
-            const newProfile = {
-              id: String(Date.now()),
-              name: fullName || "Vegas Guest",
-              age: "27",
-              badge: "✨ BEST DRESSED • NEW MEMBER ✨",
-              status: "Just created my profile! Looking to step out and connect in Vegas.",
-              location: "The Strip",
-              zone: "The Strip",
-              vibe: "Nightlife & Clubs",
-              photo: photoPreview || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
-              time: "Just Now"
-            };
+            // Real Supabase Sign-Up Call
+            try {
+              const res = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+                method: 'POST',
+                headers: {
+                  'apikey': SUPABASE_ANON_KEY,
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  email,
+                  password,
+                  data: { 
+                    full_name: fullName, 
+                    avatar_url: photoPreview 
+                  }
+                })
+              });
+              const data = await res.json();
 
-            setProfiles([newProfile, ...profiles]);
+              if (data.id || data.user) {
+                // Instantly append newly created profile to active local feed
+                const newProfile = {
+                  id: data.id || (data.user && data.user.id) || String(Date.now()),
+                  name: fullName || "Vegas Guest",
+                  age: "27",
+                  badge: "✨ BEST DRESSED • NEW MEMBER ✨",
+                  status: "Just created my profile! Looking to step out and connect in Vegas.",
+                  location: "The Strip",
+                  zone: "The Strip",
+                  vibe: "Nightlife & Clubs",
+                  photo: photoPreview || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
+                  time: "Just Now"
+                };
+                setProfiles([newProfile, ...profiles]);
 
-            alert(`🎉 Profile Created!\n\nA welcome email has been sent to ${email}:\n\n"Welcome to Las Vegas Vibe! Dress Up. Step Out. Connect."`);
+                alert(`🎉 Account registered directly in Supabase for ${email}! Welcome to Vegas Vibe.`);
+                setShowAuthModal(false);
+              } else {
+                alert(data.msg || data.error_description || "Sign up failed. Please try a different email.");
+              }
+            } catch (err) {
+              alert("Sign up error. Please try again.");
+            }
           }
 
-          setShowAuthModal(false);
           setEmail('');
           setPassword('');
           setFullName('');
@@ -276,7 +324,7 @@
               ))}
             </div>
 
-            {/* AUTH & PROFILE CREATOR MODAL WITH CAMERA/GALLERY UPLOAD */}
+            {/* AUTH & PROFILE CREATOR MODAL WITH SUPABASE API */}
             {showAuthModal && (
               <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.92)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
                 <div style={{ backgroundColor: '#180B30', borderRadius: '28px', padding: '28px', maxWidth: '320px', width: '100%', textAlign: 'center', border: '2px solid #FF007A', boxShadow: '0 0 40px rgba(255,0,122,0.5)', maxHeight: '90vh', overflowY: 'auto' }}>
@@ -355,7 +403,7 @@
                       type="submit" 
                       style={{ padding: '14px', borderRadius: '14px', background: 'linear-gradient(90deg, #FF007A 0%, #00F0FF 100%)', color: '#FFF', border: 'none', fontWeight: '900', fontSize: '14px', cursor: 'pointer', marginTop: '4px', textTransform: 'uppercase' }}
                     >
-                      {authMode === 'login' ? 'Log In Now →' : 'Publish Profile & Get Welcome Mail ✨'}
+                      {authMode === 'login' ? 'Log In Now →' : 'Publish Profile to Supabase ✨'}
                     </button>
                   </form>
 
