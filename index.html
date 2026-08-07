@@ -8,74 +8,185 @@
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #0A0118;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        color: #FFFFFF;
+      }
+      .custom-scroll::-webkit-scrollbar { display: none; }
+      .custom-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
   </head>
-  <body style="margin: 0; padding: 0; background-color: #0D0221;">
+  <body>
     <div id="root"></div>
 
     <script type="text/babel">
-      const { useState } = React;
+      const { useState, useEffect } = React;
+
+      const SUPABASE_URL = "https://cckcexzahqiwziisggmx.supabase.co";
+      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNja2NleHphaHFpd3ppaXNnZ214Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwMjQxMDMsImV4cCI6MjEwMTYwMDEwM30.TbO-BkRPE28y76ZhNqHnVkfP9TdVRuEmsjATKMw8_Y8";
 
       function App() {
-        const [activeTab, setActiveTab] = useState('radar');
+        const [activeTab, setActiveTab] = useState('companions');
         const [vibeMode, setVibeMode] = useState('High Energy');
-        const [selectedNeighborhood, setSelectedNeighborhood] = useState('All');
-        const [showQRModal, setShowQRModal] = useState(false);
+        const [selectedZone, setSelectedZone] = useState('All');
+        const [selectedProfile, setSelectedProfile] = useState(null);
         const [selectedVenue, setSelectedVenue] = useState(null);
+        const [showPassModal, setShowPassModal] = useState(false);
+        const [userBeaconActive, setUserBeaconActive] = useState(true);
 
-        const venues = [
-          { id: 1, name: "Velveteen Rabbit", zone: "Arts District", perk: "15% Off Check + Free Craft App", category: "Speakeasy" },
-          { id: 2, name: "The Chandelier", zone: "The Strip", perk: "2-for-1 Signature Cocktails", category: "Lounge" },
-          { id: 3, name: "Golden Tiki", zone: "Chinatown", perk: "Complimentary Dole Whip Shot", category: "Tiki Bar" },
-          { id: 4, name: "Honey Salt", zone: "Summerlin", perk: "Free Dessert with 2 Entrees", category: "Dining" }
-        ];
+        // Dynamic Data States
+        const [profiles, setProfiles] = useState([]);
+        const [venues, setVenues] = useState([]);
+        const [loading, setLoading] = useState(true);
 
-        const events = [
-          { id: 1, title: "Residency Concert at Caesars", venue: "The Colosseum", offer: "I Have an Extra Ticket", tag: "Show" },
-          { id: 2, title: "Late Night Sushi & Drinks", venue: "Catch at ARIA", offer: "Looking to Split Bill", tag: "Dining" },
-          { id: 3, title: "Dayclub Pool Party Crew", venue: "LIV Beach", offer: "Ticket Covered (My Guest)", tag: "Pool Party" }
-        ];
+        // Fetch Live Profiles & Venues from Supabase
+        useEffect(() => {
+          async function fetchData() {
+            try {
+              // 1. Fetch Profiles
+              const resProfiles = await fetch(`${SUPABASE_URL}/rest/v1/profiles?select=*`, {
+                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+              });
+              const dataProfiles = await resProfiles.json();
 
-        const filteredVenues = selectedNeighborhood === 'All' 
-          ? venues 
-          : venues.filter(v => v.zone === selectedNeighborhood);
+              if (Array.isArray(dataProfiles) && dataProfiles.length > 0) {
+                setProfiles(dataProfiles);
+              } else {
+                // High-Converting Initial Companions (Fallback)
+                setProfiles([
+                  {
+                    id: "1",
+                    full_name: "Elena R.",
+                    age: 27,
+                    user_type: "VISITOR",
+                    trip_dates: "In Vegas thru Sun",
+                    avatar_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
+                    gallery_urls: [
+                      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
+                      "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=600&q=80"
+                    ],
+                    status_message: "Looking for a cocktail buddy at Cosmopolitan or Arts District tonight! 🍸",
+                    preferred_vibe: "Curated Lounge",
+                    zone: "The Strip"
+                  },
+                  {
+                    id: "2",
+                    full_name: "Marcus T.",
+                    age: 31,
+                    user_type: "LOCAL",
+                    trip_dates: "Arts District Resident",
+                    avatar_url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80",
+                    gallery_urls: [
+                      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80"
+                    ],
+                    status_message: "Down to split a VIP table or hit speakeasies in Chinatown.",
+                    preferred_vibe: "High Energy",
+                    zone: "Chinatown"
+                  },
+                  {
+                    id: "3",
+                    full_name: "Sophia L.",
+                    age: 25,
+                    user_type: "VISITOR",
+                    trip_dates: "Here for EDC / Weekend",
+                    avatar_url: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80",
+                    gallery_urls: [
+                      "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80"
+                    ],
+                    status_message: "Have an extra +1 ticket for Omnia Nightclub tonight. DM me!",
+                    preferred_vibe: "High Energy",
+                    zone: "The Strip"
+                  }
+                ]);
+              }
 
-        const handleOpenPass = (venue) => {
-          setSelectedVenue(venue);
-          setShowQRModal(true);
-        };
+              // 2. Fetch Venues
+              const resVenues = await fetch(`${SUPABASE_URL}/rest/v1/venues?select=*`, {
+                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+              });
+              const dataVenues = await resVenues.json();
+
+              if (Array.isArray(dataVenues) && dataVenues.length > 0) {
+                setVenues(dataVenues);
+              } else {
+                setVenues([
+                  { id: "v1", name: "Velveteen Rabbit", neighborhood: "Arts District", perk_title: "15% Off Total Check + Free Craft App", category: "Speakeasy" },
+                  { id: "v2", name: "The Chandelier", neighborhood: "The Strip", perk_title: "2-for-1 Signature Cocktails", category: "Lounge" },
+                  { id: "v3", name: "Golden Tiki", neighborhood: "Chinatown", perk_title: "Complimentary Dole Whip Shot", category: "Tiki Bar" }
+                ]);
+              }
+
+              setLoading(false);
+            } catch (err) {
+              console.error("Supabase load error", err);
+              setLoading(false);
+            }
+          }
+          fetchData();
+        }, []);
+
+        const filteredProfiles = selectedZone === 'All' 
+          ? profiles 
+          : profiles.filter(p => p.zone === selectedZone || selectedZone === 'All');
 
         return (
-          <div style={{ color: '#FFFFFF', minHeight: '100vh', fontFamily: 'system-ui, sans-serif', padding: '16px', maxWidth: '480px', margin: '0 auto' }}>
+          <div style={{ maxWidth: '480px', margin: '0 auto', minHeight: '100vh', paddingBottom: '80px', position: 'relative' }}>
             
-            {/* HEADER */}
-            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #2A085C', paddingBottom: '12px', marginBottom: '20px' }}>
+            {/* APP HEADER */}
+            <header style={{ padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'linear-gradient(180deg, rgba(26,11,54,0.9) 0%, rgba(10,1,24,0) 100%)' }}>
               <div>
-                <h1 style={{ margin: 0, fontSize: '22px', fontWeight: '900', color: '#FF007A' }}>
+                <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '900', letterSpacing: '1px', background: 'linear-gradient(90deg, #FF007A 0%, #7B2CBF 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                   LAS VEGAS VIBE
                 </h1>
-                <p style={{ margin: 0, fontSize: '11px', color: '#A0A0B2' }}>⚡ 1,420 Active Beacons Tonight</p>
+                <p style={{ margin: '2px 0 0 0', fontSize: '11px', color: '#A0A0B2' }}>
+                  <i className="fa-solid fa-bolt" style={{ color: '#FFD700', marginRight: '4px' }}></i>
+                  {profiles.length} Active Beacons Near You
+                </p>
               </div>
-              <div style={{ backgroundColor: '#1A0B36', padding: '6px 12px', borderRadius: '20px', border: '1px solid #7B2CBF', fontSize: '12px', fontWeight: 'bold', color: '#FFD700' }}>
-                {vibeMode}
-              </div>
+              <button 
+                onClick={() => setUserBeaconActive(!userBeaconActive)}
+                style={{ 
+                  backgroundColor: userBeaconActive ? 'rgba(0, 230, 118, 0.15)' : 'rgba(255, 255, 255, 0.05)', 
+                  border: userBeaconActive ? '1px solid #00E676' : '1px solid #444', 
+                  borderRadius: '20px', 
+                  padding: '6px 12px', 
+                  color: userBeaconActive ? '#00E676' : '#888', 
+                  fontSize: '11px', 
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <span style={{ height: '8px', width: '8px', borderRadius: '50%', backgroundColor: userBeaconActive ? '#00E676' : '#888', display: 'inline-block' }}></span>
+                {userBeaconActive ? 'Your Beacon On' : 'Beacon Off'}
+              </button>
             </header>
 
             {/* VIBE MODE SELECTOR */}
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', overflowX: 'auto' }}>
+            <div className="custom-scroll" style={{ display: 'flex', gap: '8px', padding: '0 16px 12px 16px', overflowX: 'auto' }}>
               {['High Energy', 'Curated Lounge', 'Classic & Chill'].map(mode => (
-                <button 
-                  key={mode} 
+                <button
+                  key={mode}
                   onClick={() => setVibeMode(mode)}
-                  style={{ 
-                    padding: '8px 14px', 
-                    borderRadius: '20px', 
-                    border: 'none', 
-                    backgroundColor: vibeMode === mode ? '#FF007A' : '#1A0B36', 
-                    color: '#FFF', 
-                    fontWeight: 'bold', 
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    border: 'none',
+                    backgroundColor: vibeMode === mode ? '#FF007A' : '#1A0B36',
+                    color: '#FFF',
+                    fontSize: '12px',
+                    fontWeight: 'bold',
                     cursor: 'pointer',
                     whiteSpace: 'nowrap',
-                    fontSize: '12px'
+                    boxShadow: vibeMode === mode ? '0 0 12px rgba(255,0,122,0.4)' : 'none'
                   }}
                 >
                   {mode}
@@ -83,26 +194,48 @@
               ))}
             </div>
 
+            {/* NEIGHBORHOOD FILTER BAR */}
+            <div className="custom-scroll" style={{ display: 'flex', gap: '6px', padding: '0 16px 16px 16px', overflowX: 'auto' }}>
+              {['All', 'The Strip', 'Arts District', 'Chinatown', 'Summerlin'].map(zone => (
+                <button
+                  key={zone}
+                  onClick={() => setSelectedZone(zone)}
+                  style={{
+                    padding: '6px 12px',
+                    borderRadius: '12px',
+                    border: selectedZone === zone ? '1px solid #7B2CBF' : '1px solid #2A085C',
+                    backgroundColor: selectedZone === zone ? '#7B2CBF' : '#100326',
+                    color: selectedZone === zone ? '#FFF' : '#A0A0B2',
+                    fontSize: '11px',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {zone}
+                </button>
+              ))}
+            </div>
+
             {/* NAVIGATION TABS */}
-            <div style={{ display: 'flex', borderBottom: '2px solid #1A0B36', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', borderBottom: '1px solid #2A085C', margin: '0 16px 16px 16px' }}>
               {[
-                { id: 'radar', label: '📍 Radar' },
-                { id: 'events', label: '🎟️ Events & +1s' },
-                { id: 'perks', label: '🍸 Dining Perks' }
+                { id: 'companions', label: '🔥 Companions', icon: 'fa-user-group' },
+                { id: 'events', label: '🎟️ Event +1s', icon: 'fa-ticket' },
+                { id: 'perks', label: '🍸 Partner Perks', icon: 'fa-martini-glass' }
               ].map(tab => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   style={{
                     flex: 1,
-                    padding: '10px 4px',
+                    padding: '12px 0',
                     backgroundColor: 'transparent',
                     border: 'none',
-                    borderBottom: activeTab === tab.id ? '3px solid #FF007A' : 'none',
+                    borderBottom: activeTab === tab.id ? '2px solid #FF007A' : 'none',
                     color: activeTab === tab.id ? '#FF007A' : '#A0A0B2',
                     fontWeight: 'bold',
-                    cursor: 'pointer',
-                    fontSize: '13px'
+                    fontSize: '13px',
+                    cursor: 'pointer'
                   }}
                 >
                   {tab.label}
@@ -110,83 +243,159 @@
               ))}
             </div>
 
-            {/* TAB 1: RADAR & VENUE MAP */}
-            {activeTab === 'radar' && (
-              <div>
-                <div style={{ display: 'flex', gap: '6px', marginBottom: '16px', overflowX: 'auto' }}>
-                  {['All', 'The Strip', 'Arts District', 'Chinatown', 'Summerlin'].map(zone => (
-                    <button
-                      key={zone}
-                      onClick={() => setSelectedNeighborhood(zone)}
-                      style={{
-                        padding: '6px 10px',
-                        borderRadius: '12px',
-                        border: '1px solid #7B2CBF',
-                        backgroundColor: selectedNeighborhood === zone ? '#7B2CBF' : '#0D0221',
-                        color: '#FFF',
-                        fontSize: '11px',
-                        cursor: 'pointer',
-                        whiteSpace: 'nowrap'
-                      }}
-                    >
-                      {zone}
-                    </button>
-                  ))}
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {filteredVenues.map(venue => (
-                    <div key={venue.id} style={{ backgroundColor: '#1A0B36', borderRadius: '12px', padding: '16px', border: '1px solid #2A085C' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <h3 style={{ margin: 0, fontSize: '16px', color: '#FFF' }}>{venue.name}</h3>
-                        <span style={{ fontSize: '10px', backgroundColor: '#2A085C', color: '#FFD700', padding: '3px 6px', borderRadius: '6px' }}>{venue.zone}</span>
-                      </div>
-                      <p style={{ color: '#FF007A', fontWeight: 'bold', margin: '8px 0', fontSize: '13px' }}>🎁 {venue.perk}</p>
-                      <button 
-                        onClick={() => handleOpenPass(venue)}
-                        style={{ width: '100%', padding: '10px', borderRadius: '8px', backgroundColor: '#7B2CBF', color: '#FFF', border: 'none', fontWeight: 'bold', cursor: 'pointer', marginTop: '4px' }}
+            {/* TAB 1: PHOTO COMPANION FEED */}
+            {activeTab === 'companions' && (
+              <div style={{ padding: '0 16px' }}>
+                {loading ? (
+                  <p style={{ textAlign: 'center', color: '#888', marginTop: '40px' }}>Loading active beacons...</p>
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    {filteredProfiles.map(profile => (
+                      <div 
+                        key={profile.id} 
+                        onClick={() => setSelectedProfile(profile)}
+                        style={{ 
+                          position: 'relative', 
+                          height: '240px', 
+                          borderRadius: '16px', 
+                          overflow: 'hidden', 
+                          cursor: 'pointer',
+                          boxShadow: '0 8px 20px rgba(0,0,0,0.4)',
+                          backgroundImage: `url(${profile.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80'})`,
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center'
+                        }}
                       >
-                        Generate Vibe Pass QR
-                      </button>
-                    </div>
-                  ))}
-                </div>
+                        {/* Gradient Overlay */}
+                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(13,2,33,0.95) 100%)' }} />
+
+                        {/* Top Badges */}
+                        <div style={{ position: 'absolute', top: '10px', left: '10px', right: '10px', display: 'flex', justifyContent: 'space-between' }}>
+                          <span style={{ backgroundColor: profile.user_type === 'LOCAL' ? '#7B2CBF' : '#FF007A', color: '#FFF', fontSize: '9px', fontWeight: '900', padding: '3px 8px', borderRadius: '10px', textTransform: 'uppercase' }}>
+                            {profile.user_type || 'VISITOR'}
+                          </span>
+                          <span style={{ backgroundColor: 'rgba(0,0,0,0.6)', color: '#FFD700', fontSize: '9px', padding: '3px 6px', borderRadius: '8px', backdropFilter: 'blur(4px)' }}>
+                            {profile.zone || 'Strip'}
+                          </span>
+                        </div>
+
+                        {/* Bottom Info */}
+                        <div style={{ position: 'absolute', bottom: '12px', left: '12px', right: '12px', zIndex: 2 }}>
+                          <h3 style={{ margin: 0, fontSize: '16px', color: '#FFF', fontWeight: '800' }}>
+                            {profile.full_name}, {profile.age || 26}
+                          </h3>
+                          <p style={{ margin: '2px 0 0 0', fontSize: '10px', color: '#FFD700' }}>
+                            {profile.trip_dates || 'Active Tonight'}
+                          </p>
+                          <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#DDD', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {profile.status_message || 'Looking to connect!'}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
             {/* TAB 2: EVENTS BOARD */}
             {activeTab === 'events' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {events.map(ev => (
-                  <div key={ev.id} style={{ backgroundColor: '#1A0B36', borderRadius: '12px', padding: '16px', border: '1px solid #2A085C' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {[
+                  { id: 1, title: "Residency Concert at Caesars", venue: "The Colosseum", offer: "I Have an Extra Ticket", host: "Sarah K.", age: 28, tag: "Show" },
+                  { id: 2, title: "Late Night Sushi & Drinks", venue: "Catch at ARIA", offer: "Looking for 2 Diners to Join", host: "Jason M.", age: 33, tag: "Dining" },
+                  { id: 3, title: "Dayclub Pool Party Crew", venue: "LIV Beach", offer: "Ticket Covered (My Guest)", host: "Chloe B.", age: 24, tag: "Pool Party" }
+                ].map(ev => (
+                  <div key={ev.id} style={{ backgroundColor: '#1A0B36', borderRadius: '16px', padding: '16px', border: '1px solid #2A085C' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontSize: '11px', color: '#A0A0B2' }}>{ev.venue}</span>
-                      <span style={{ fontSize: '10px', color: '#FFD700', backgroundColor: '#2A085C', padding: '2px 6px', borderRadius: '6px' }}>{ev.tag}</span>
+                      <span style={{ fontSize: '10px', color: '#FFD700', backgroundColor: '#2A085C', padding: '3px 8px', borderRadius: '8px', fontWeight: 'bold' }}>{ev.tag}</span>
                     </div>
-                    <h3 style={{ margin: '6px 0', fontSize: '15px', color: '#FFF' }}>{ev.title}</h3>
-                    <p style={{ margin: '4px 0', fontSize: '12px', color: '#FF007A', fontWeight: 'bold' }}>{ev.offer}</p>
-                    <button style={{ width: '100%', padding: '10px', borderRadius: '8px', backgroundColor: '#FF007A', color: '#FFF', border: 'none', fontWeight: 'bold', cursor: 'pointer', marginTop: '8px' }}>
-                      Send Vibe Pitch
+                    <h3 style={{ margin: '8px 0 4px 0', fontSize: '16px', color: '#FFF' }}>{ev.title}</h3>
+                    <p style={{ margin: '0 0 12px 0', fontSize: '13px', color: '#FF007A', fontWeight: 'bold' }}>{ev.offer}</p>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #2A085C', paddingTop: '10px' }}>
+                      <span style={{ fontSize: '12px', color: '#DDD' }}>Host: <strong>{ev.host}</strong> ({ev.age})</span>
+                      <button style={{ backgroundColor: '#FF007A', border: 'none', borderRadius: '8px', padding: '6px 14px', color: '#FFF', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }}>
+                        Send Pitch
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* TAB 3: PARTNER DINING PERKS */}
+            {activeTab === 'perks' && (
+              <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {venues.map(v => (
+                  <div key={v.id} style={{ backgroundColor: '#1A0B36', borderRadius: '16px', padding: '16px', border: '1px solid #2A085C' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <h3 style={{ margin: 0, fontSize: '16px', color: '#FFF' }}>{v.name}</h3>
+                      <span style={{ fontSize: '10px', color: '#FFD700', backgroundColor: '#2A085C', padding: '3px 8px', borderRadius: '8px' }}>{v.neighborhood || 'Vegas'}</span>
+                    </div>
+                    <p style={{ color: '#FF007A', fontWeight: 'bold', margin: '8px 0', fontSize: '13px' }}>🎁 {v.perk_title}</p>
+                    <button 
+                      onClick={() => { setSelectedVenue(v); setShowPassModal(true); }}
+                      style={{ width: '100%', padding: '10px', borderRadius: '10px', backgroundColor: '#7B2CBF', color: '#FFF', border: 'none', fontWeight: 'bold', cursor: 'pointer', marginTop: '4px' }}
+                    >
+                      Generate Vibe Pass QR
                     </button>
                   </div>
                 ))}
               </div>
             )}
 
-            {/* TAB 3: DINING PERKS */}
-            {activeTab === 'perks' && (
-              <div style={{ backgroundColor: '#1A0B36', borderRadius: '12px', padding: '20px', textAlign: 'center', border: '1px solid #2A085C' }}>
-                <h2 style={{ color: '#FFD700', marginTop: 0, fontSize: '18px' }}>Partner Dining Perks</h2>
-                <p style={{ color: '#A0A0B2', fontSize: '13px', lineHeight: '1.4' }}>Present your digital Vibe Pass to host stands or bartenders at participating Las Vegas venues to unlock check discounts and complimentary drinks.</p>
+            {/* PROFILE LIGHTBOX MODAL */}
+            {selectedProfile && (
+              <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.9)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'flex-end' }}>
+                <div style={{ backgroundColor: '#1A0B36', borderTopLeftRadius: '24px', borderTopRightRadius: '24px', width: '100%', maxWidth: '480px', maxHeight: '85vh', overflowY: 'auto', padding: '24px', borderTop: '2px solid #FF007A', position: 'relative' }}>
+                  
+                  <button 
+                    onClick={() => setSelectedProfile(null)}
+                    style={{ position: 'absolute', top: '16px', right: '16px', backgroundColor: 'rgba(255,255,255,0.1)', border: 'none', color: '#FFF', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', fontSize: '16px' }}
+                  >
+                    ✕
+                  </button>
+
+                  <div style={{ display: 'flex', gap: '16px', alignItems: 'center', marginBottom: '16px' }}>
+                    <img 
+                      src={selectedProfile.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80'} 
+                      style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #FF007A' }} 
+                    />
+                    <div>
+                      <h2 style={{ margin: 0, fontSize: '20px', color: '#FFF' }}>{selectedProfile.full_name}, {selectedProfile.age || 26}</h2>
+                      <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: '#FFD700' }}>{selectedProfile.trip_dates || 'Visiting Las Vegas'}</p>
+                      <span style={{ display: 'inline-block', marginTop: '6px', backgroundColor: '#7B2CBF', color: '#FFF', fontSize: '10px', padding: '2px 8px', borderRadius: '8px', fontWeight: 'bold' }}>
+                        Vibe: {selectedProfile.preferred_vibe || 'Curated Lounge'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div style={{ backgroundColor: '#100326', padding: '12px 16px', borderRadius: '12px', marginBottom: '16px', border: '1px solid #2A085C' }}>
+                    <p style={{ margin: 0, fontSize: '13px', color: '#FFF', fontStyle: 'italic' }}>
+                      "{selectedProfile.status_message || 'Looking to connect for drinks or events in Vegas!'}"
+                    </p>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                    <button 
+                      onClick={() => alert(`Connection pitch sent to ${selectedProfile.full_name}!`)}
+                      style={{ flex: 1, padding: '14px', borderRadius: '12px', backgroundColor: '#FF007A', color: '#FFF', border: 'none', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer' }}
+                    >
+                      Propose Vibe Outing
+                    </button>
+                  </div>
+
+                </div>
               </div>
             )}
 
             {/* VIBE PASS QR MODAL */}
-            {showQRModal && (
+            {showPassModal && selectedVenue && (
               <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px', zIndex: 1000 }}>
                 <div style={{ backgroundColor: '#1A0B36', borderRadius: '20px', padding: '24px', maxWidth: '280px', width: '100%', textAlign: 'center', border: '2px solid #FF007A' }}>
                   <h3 style={{ margin: 0, color: '#FF007A', fontSize: '16px' }}>OFFICIAL VIBE PASS</h3>
-                  <p style={{ color: '#FFF', fontWeight: 'bold', margin: '6px 0', fontSize: '14px' }}>{selectedVenue?.name}</p>
+                  <p style={{ color: '#FFF', fontWeight: 'bold', margin: '6px 0', fontSize: '14px' }}>{selectedVenue.name}</p>
                   
                   <div style={{ backgroundColor: '#FFF', padding: '16px', borderRadius: '12px', margin: '14px 0', display: 'inline-block' }}>
                     <div style={{ width: '120px', height: '120px', backgroundColor: '#000', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#FFF', fontSize: '10px' }}>
@@ -194,11 +403,9 @@
                     </div>
                   </div>
 
-                  <p style={{ color: '#FFD700', fontSize: '12px', margin: 0, fontWeight: 'bold' }}>{selectedVenue?.perk}</p>
-                  <p style={{ color: '#A0A0B2', fontSize: '10px', marginTop: '4px' }}>Valid for 3 hours from generation</p>
-
+                  <p style={{ color: '#FFD700', fontSize: '12px', margin: 0, fontWeight: 'bold' }}>{selectedVenue.perk_title}</p>
                   <button 
-                    onClick={() => setShowQRModal(false)}
+                    onClick={() => setShowPassModal(false)}
                     style={{ width: '100%', padding: '10px', borderRadius: '8px', backgroundColor: '#2A085C', color: '#FFF', border: 'none', fontWeight: 'bold', cursor: 'pointer', marginTop: '14px' }}
                   >
                     Close Pass
