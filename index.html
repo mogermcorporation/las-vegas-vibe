@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Las Vegas Vibe | Wild & Fun Meetups</title>
+    <title>Las Vegas Vibe | Dress Up. Step Out. Connect.</title>
     <!-- React & Babel CDNs -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
@@ -39,16 +39,18 @@
       function App() {
         const [selectedVibe, setSelectedVibe] = useState('All');
         const [showAuthGate, setShowAuthGate] = useState(false);
+        const [showCoachingModal, setShowCoachingModal] = useState(false);
+        const [coachingStep, setCoachingStep] = useState(1);
         const [selectedPerson, setSelectedPerson] = useState(null);
 
-        // High-Energy, Aesthetic Profiles & Adventurous Meetups
+        // High-Energy, Aesthetic Profiles with Best Dressed Badges
         const profiles = [
           {
             id: "1",
             name: "Chloe & Mia",
             age: "24 & 25",
-            badge: "GIRLS NIGHT OUT 🥂",
-            status: "Looking for fun guys to join us for rooftop drinks at Waldorf then hit Omnia!",
+            badge: "✨ BEST DRESSED • GIRLS NIGHT 🥂",
+            status: "Dressed up for rooftop drinks at Waldorf then hitting Omnia! Looking for fun company.",
             location: "Waldorf Astoria Rooftop Bar",
             zone: "The Strip",
             vibe: "Nightlife & Clubs",
@@ -59,8 +61,8 @@
             id: "2",
             name: "Julian",
             age: "29",
-            badge: "POOL VIBES ☀️",
-            status: "Cabana reserved at Fontainebleau pool dayclub. Need fun people to split drinks and hang out!",
+            badge: "✨ BEST DRESSED • CABANA ☀️",
+            status: "Sharp resort wear & cabana reserved at Fontainebleau pool. Come hang out!",
             location: "LIV Beach Dayclub",
             zone: "The Strip",
             vibe: "Pool Parties",
@@ -71,8 +73,8 @@
             id: "3",
             name: "Sienna",
             age: "26",
-            badge: "LATE NIGHT ADVENTURE 🌮",
-            status: "Craving late night gourmet tacos in Chinatown then hidden speakeasy drinks. Who's driving?",
+            badge: "✨ ELEVATED • SPEAKEASY 🌮",
+            status: "Gourmet tacos in Chinatown then hidden speakeasy drinks. Who's driving?",
             location: "Chinatown Speakeasy Walk",
             zone: "Chinatown",
             vibe: "Food & Speakeasies",
@@ -83,25 +85,13 @@
             id: "4",
             name: "Jaxson & Leo",
             age: "28 & 30",
-            badge: "CASINO & COCKTAILS 🎲",
-            status: "Playing blackjack at Cosmopolitan. Need a lucky charm to join us at the table!",
+            badge: "✨ BEST DRESSED • CASINO 🎲",
+            status: "Tailored suits & playing blackjack at Cosmopolitan. Need a lucky charm at the table!",
             location: "The Chandelier @ Cosmo",
             zone: "The Strip",
             vibe: "Casino & Lounges",
             photo: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=800&q=80",
             time: "5 mins ago"
-          },
-          {
-            id: "5",
-            name: "Vanessa",
-            age: "27",
-            badge: "COFFEE & SHOPPING ☕",
-            status: "Grabbing iced lattes at Fashion Show Mall before hitting designer shops. Come walk with me!",
-            location: "Starbucks @ Fashion Show",
-            zone: "The Strip",
-            vibe: "Casual & Chill",
-            photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
-            time: "15 mins ago"
           }
         ];
 
@@ -119,25 +109,27 @@
             
             {/* VIBRANT TOP TICKER */}
             <div style={{ backgroundColor: '#FF007A', color: '#FFF', fontSize: '11px', fontWeight: '900', padding: '6px 12px', textAlign: 'center', letterSpacing: '0.5px' }}>
-              🔥 1,240 PEOPLE MEETING UP IN VEGAS RIGHT NOW
+              🔥 DRESS UP. STEP OUT. 1,240 PEOPLE MEETING UP TONIGHT
             </div>
 
             {/* APP HEADER */}
             <header style={{ padding: '16px 16px 12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <h1 style={{ margin: 0, fontSize: '26px', fontWeight: '900', fontStyle: 'italic', background: 'linear-gradient(90deg, #FF007A 0%, #00F0FF 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                  VEGAS VIBE ⚡
+                <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '900', fontStyle: 'italic', background: 'linear-gradient(90deg, #FF007A 0%, #00F0FF 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                  LAS VEGAS VIBE ⚡
                 </h1>
                 <p style={{ margin: '2px 0 0 0', fontSize: '11px', color: '#FFD700', fontWeight: 'bold' }}>
-                  Non-Stop Fun • Live Companions
+                  Look Your Best • Connect Live
                 </p>
               </div>
 
-              {/* LIVE PULSE INDICATOR */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(0, 230, 118, 0.15)', padding: '6px 12px', borderRadius: '20px', border: '1px solid #00E676' }}>
-                <span className="live-pulse" style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#00E676', display: 'inline-block' }}></span>
-                <span style={{ fontSize: '10px', color: '#00E676', fontWeight: '900', textTransform: 'uppercase' }}>Live Feed</span>
-              </div>
+              {/* PROFILE COACHING CTA */}
+              <button 
+                onClick={() => { setCoachingStep(1); setShowCoachingModal(true); }}
+                style={{ backgroundColor: 'rgba(255, 215, 0, 0.15)', border: '1px solid #FFD700', borderRadius: '20px', padding: '6px 12px', color: '#FFD700', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }}
+              >
+                📸 Photo Studio
+              </button>
             </header>
 
             {/* HIGH-ENERGY VIBE CATEGORIES */}
@@ -156,8 +148,7 @@
                     fontWeight: '800',
                     cursor: 'pointer',
                     whiteSpace: 'nowrap',
-                    boxShadow: selectedVibe === vibe ? '0 0 15px rgba(255,0,122,0.6)' : 'none',
-                    transition: 'all 0.2s ease'
+                    boxShadow: selectedVibe === vibe ? '0 0 15px rgba(255,0,122,0.6)' : 'none'
                   }}
                 >
                   {vibe}
@@ -179,7 +170,6 @@
                     boxShadow: '0 12px 30px rgba(0,0,0,0.5)'
                   }}
                 >
-                  {/* Photo Container */}
                   <div style={{ position: 'relative', height: '360px', width: '100%' }}>
                     <img 
                       src={person.photo} 
@@ -187,20 +177,17 @@
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                     />
                     
-                    {/* Dark Gradient Overlay for Crisp Text */}
                     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 40%, rgba(7,1,20,0.95) 100%)' }} />
 
-                    {/* Top Floating Badges */}
                     <div style={{ position: 'absolute', top: '14px', left: '14px', right: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ backgroundColor: '#FF007A', color: '#FFF', fontSize: '10px', fontWeight: '900', padding: '5px 12px', borderRadius: '15px', textTransform: 'uppercase', letterSpacing: '0.5px', boxShadow: '0 4px 10px rgba(0,0,0,0.3)' }}>
+                      <span style={{ backgroundColor: 'rgba(0,0,0,0.8)', border: '1px solid #FFD700', color: '#FFD700', fontSize: '9px', fontWeight: '900', padding: '5px 10px', borderRadius: '15px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                         {person.badge}
                       </span>
-                      <span style={{ backgroundColor: 'rgba(0,0,0,0.7)', color: '#00F0FF', fontSize: '10px', fontWeight: 'bold', padding: '5px 10px', borderRadius: '12px', backdropFilter: 'blur(4px)' }}>
+                      <span style={{ backgroundColor: 'rgba(0,0,0,0.7)', color: '#00F0FF', fontSize: '10px', fontWeight: 'bold', padding: '5px 10px', borderRadius: '12px' }}>
                         ⚡ {person.time}
                       </span>
                     </div>
 
-                    {/* Overlay Info */}
                     <div style={{ position: 'absolute', bottom: '16px', left: '16px', right: '16px' }}>
                       <h2 style={{ margin: 0, fontSize: '24px', fontWeight: '900', color: '#FFF' }}>
                         {person.name}, <span style={{ color: '#FFD700' }}>{person.age}</span>
@@ -208,14 +195,13 @@
                       <p style={{ margin: '4px 0 8px 0', fontSize: '12px', color: '#00F0FF', fontWeight: 'bold' }}>
                         📍 {person.location} ({person.zone})
                       </p>
-                      <p style={{ margin: 0, fontSize: '13px', color: '#FFF', lineHeight: '1.4', fontStyle: 'italic', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
+                      <p style={{ margin: 0, fontSize: '13px', color: '#FFF', lineHeight: '1.4', fontStyle: 'italic' }}>
                         "{person.status}"
                       </p>
                     </div>
                   </div>
 
-                  {/* High-Converting Action Bar */}
-                  <div style={{ padding: '14px 16px', backgroundColor: '#120726', display: 'flex', gap: '10px', alignItems: 'center' }}>
+                  <div style={{ padding: '14px 16px', backgroundColor: '#120726', display: 'flex', gap: '10px' }}>
                     <button 
                       onClick={() => handleConnect(person)}
                       style={{ 
@@ -228,58 +214,97 @@
                         fontWeight: '900', 
                         fontSize: '13px', 
                         cursor: 'pointer',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.5px',
-                        boxShadow: '0 4px 15px rgba(255,0,122,0.4)'
+                        textTransform: 'uppercase'
                       }}
                     >
-                      Join Outing / Chat Now →
+                      Connect & Meet Up →
                     </button>
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* SIGN-UP GATE MODAL */}
-            {showAuthGate && (
+            {/* LOOK YOUR BEST PHOTO-COACHING MODAL */}
+            {showCoachingModal && (
               <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.92)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
-                <div style={{ backgroundColor: '#180B30', borderRadius: '28px', padding: '28px', maxWidth: '320px', width: '100%', textAlign: 'center', border: '2px solid #FF007A', boxShadow: '0 0 40px rgba(255,0,122,0.5)' }}>
+                <div style={{ backgroundColor: '#180B30', borderRadius: '28px', padding: '28px', maxWidth: '340px', width: '100%', textAlign: 'center', border: '2px solid #FFD700', boxShadow: '0 0 40px rgba(255,215,0,0.3)' }}>
                   
-                  <div style={{ fontSize: '36px', marginBottom: '8px' }}>🎉</div>
-                  
-                  <h2 style={{ margin: 0, color: '#FFF', fontSize: '22px', fontWeight: '900' }}>
-                    JOIN THE FUN
-                  </h2>
-                  <p style={{ color: '#FFD700', fontSize: '12px', fontWeight: 'bold', margin: '6px 0 16px 0' }}>
-                    Create a free account to message {selectedPerson?.name || 'companions'} & join meetups!
-                  </p>
+                  <div style={{ fontSize: '10px', color: '#FFD700', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                    Vibe Photo Studio • Lesson {coachingStep} of 3
+                  </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <input 
-                      type="email" 
-                      placeholder="Your Email" 
-                      style={{ padding: '14px', borderRadius: '12px', border: '1px solid #33155C', backgroundColor: '#0A0118', color: '#FFF', fontSize: '13px', outline: 'none' }}
-                    />
-                    <input 
-                      type="password" 
-                      placeholder="Create Password" 
-                      style={{ padding: '14px', borderRadius: '12px', border: '1px solid #33155C', backgroundColor: '#0A0118', color: '#FFF', fontSize: '13px', outline: 'none' }}
-                    />
-                    <button 
-                      onClick={() => { alert('Welcome to Vegas Vibe! Your account is ready.'); setShowAuthGate(false); }}
-                      style={{ padding: '14px', borderRadius: '14px', background: 'linear-gradient(90deg, #FF007A 0%, #00F0FF 100%)', color: '#FFF', border: 'none', fontWeight: '900', fontSize: '14px', cursor: 'pointer', marginTop: '4px', textTransform: 'uppercase' }}
-                    >
-                      Unlock Full App Free
-                    </button>
+                  {coachingStep === 1 && (
+                    <div>
+                      <h2 style={{ color: '#FFF', fontSize: '20px', fontWeight: '900', margin: '12px 0 8px 0' }}>💡 Rule 1: Master Vegas Lighting</h2>
+                      <p style={{ color: '#DDD', fontSize: '12px', lineHeight: '1.5' }}>
+                        Skip hotel overhead lights. Use warm ambient lounge lighting or golden hour sunlight by resort pools. High contrast = high attraction.
+                      </p>
+                    </div>
+                  )}
+
+                  {coachingStep === 2 && (
+                    <div>
+                      <h2 style={{ color: '#FFF', fontSize: '20px', fontWeight: '900', margin: '12px 0 8px 0' }}>📐 Rule 2: Angles Over Selfies</h2>
+                      <p style={{ color: '#DDD', fontSize: '12px', lineHeight: '1.5' }}>
+                        No tight bathroom selfies. Have a friend capture mid-chest or full-body candid shots walking through upscale venues.
+                      </p>
+                    </div>
+                  )}
+
+                  {coachingStep === 3 && (
+                    <div>
+                      <h2 style={{ color: '#FFF', fontSize: '20px', fontWeight: '900', margin: '12px 0 8px 0' }}>👔 Rule 3: Dress Up & Stand Out</h2>
+                      <p style={{ color: '#DDD', fontSize: '12px', lineHeight: '1.5' }}>
+                        Vegas rewards high effort. Tailored jackets, chic evening dresses, or crisp resort wear unlock the ✨ Best Dressed profile badge!
+                      </p>
+                    </div>
+                  )}
+
+                  <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                    {coachingStep < 3 ? (
+                      <button 
+                        onClick={() => setCoachingStep(coachingStep + 1)}
+                        style={{ width: '100%', padding: '12px', borderRadius: '12px', backgroundColor: '#FF007A', color: '#FFF', border: 'none', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer' }}
+                      >
+                        Next Tip →
+                      </button>
+                    ) : (
+                      <button 
+                        onClick={() => { setShowCoachingModal(false); setShowAuthGate(true); }}
+                        style={{ width: '100%', padding: '12px', borderRadius: '12px', background: 'linear-gradient(90deg, #FFD700 0%, #FF007A 100%)', color: '#000', border: 'none', fontWeight: '900', fontSize: '13px', cursor: 'pointer' }}
+                      >
+                        Create My Profile Now ✨
+                      </button>
+                    )}
                   </div>
 
                   <button 
-                    onClick={() => setShowAuthGate(false)}
-                    style={{ backgroundColor: 'transparent', border: 'none', color: '#888', fontSize: '12px', marginTop: '16px', cursor: 'pointer' }}
+                    onClick={() => setShowCoachingModal(false)}
+                    style={{ backgroundColor: 'transparent', border: 'none', color: '#888', fontSize: '11px', marginTop: '12px', cursor: 'pointer' }}
                   >
-                    Keep Browsing Feed
+                    Close Studio
                   </button>
 
+                </div>
+              </div>
+            )}
+
+            {/* AUTH / SIGN-UP MODAL */}
+            {showAuthGate && (
+              <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.92)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
+                <div style={{ backgroundColor: '#180B30', borderRadius: '28px', padding: '28px', maxWidth: '320px', width: '100%', textAlign: 'center', border: '2px solid #FF007A' }}>
+                  <h2 style={{ margin: 0, color: '#FFF', fontSize: '20px', fontWeight: '900' }}>JOIN THE FUN</h2>
+                  <p style={{ color: '#FFD700', fontSize: '12px', fontWeight: 'bold', margin: '6px 0 16px 0' }}>
+                    Sign up free to connect with {selectedPerson?.name || 'companions'}!
+                  </p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <input type="email" placeholder="Your Email" style={{ padding: '12px', borderRadius: '10px', border: '1px solid #33155C', backgroundColor: '#0A0118', color: '#FFF', fontSize: '13px', outline: 'none' }} />
+                    <input type="password" placeholder="Create Password" style={{ padding: '12px', borderRadius: '10px', border: '1px solid #33155C', backgroundColor: '#0A0118', color: '#FFF', fontSize: '13px', outline: 'none' }} />
+                    <button onClick={() => { alert('Welcome! Your profile is ready.'); setShowAuthGate(false); }} style={{ padding: '12px', borderRadius: '10px', background: 'linear-gradient(90deg, #FF007A 0%, #00F0FF 100%)', color: '#FFF', border: 'none', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer' }}>
+                      Create Free Account
+                    </button>
+                  </div>
+                  <button onClick={() => setShowAuthGate(false)} style={{ backgroundColor: 'transparent', border: 'none', color: '#888', fontSize: '12px', marginTop: '14px', cursor: 'pointer' }}>Close</button>
                 </div>
               </div>
             )}
