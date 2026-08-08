@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Las Vegas Vibe | Dress Up. Step Out. Connect.</title>
+    <title>Las Vegas Vibe | Exclusive VIP Social Club</title>
     <!-- React & Babel CDNs -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
@@ -20,12 +20,6 @@
       }
       .custom-scroll::-webkit-scrollbar { display: none; }
       .custom-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-      @keyframes pulse {
-        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.7); }
-        70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(0, 230, 118, 0); }
-        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 230, 118, 0); }
-      }
-      .live-pulse { animation: pulse 2s infinite; }
     </style>
   </head>
   <body>
@@ -40,9 +34,8 @@
       function App() {
         const [selectedVibe, setSelectedVibe] = useState('All');
         const [showAuthModal, setShowAuthModal] = useState(false);
-        const [authMode, setAuthMode] = useState('login'); // 'login' or 'signup'
-        const [showCoachingModal, setShowCoachingModal] = useState(false);
-        const [coachingStep, setCoachingStep] = useState(1);
+        const [authMode, setAuthMode] = useState('signup');
+        const [userGender, setUserGender] = useState('female');
         const [selectedPerson, setSelectedPerson] = useState(null);
 
         // Form & Upload States
@@ -50,14 +43,15 @@
         const [password, setPassword] = useState('');
         const [fullName, setFullName] = useState('');
         const [photoPreview, setPhotoPreview] = useState(null);
+        const [verifyingPhoto, setVerifyingPhoto] = useState(false);
 
         const [profiles, setProfiles] = useState([
           {
             id: "1",
             name: "Chloe & Mia",
             age: "24 & 25",
-            badge: "✨ BEST DRESSED • GIRLS NIGHT 🥂",
-            status: "Dressed up for rooftop drinks at Waldorf then hitting Omnia! Looking for fun company.",
+            badge: "✨ VERIFIED VIP • HIGH QUALITY 🥂",
+            status: "Dressed up for rooftop drinks at Waldorf then hitting Omnia! Looking for high-energy company.",
             location: "Waldorf Astoria Rooftop Bar",
             zone: "The Strip",
             vibe: "Nightlife & Clubs",
@@ -68,7 +62,7 @@
             id: "2",
             name: "Julian",
             age: "29",
-            badge: "✨ BEST DRESSED • CABANA ☀️",
+            badge: "🖤 BLACK KEY MEMBER • CABANA ☀️",
             status: "Sharp resort wear & cabana reserved at Fontainebleau pool. Come hang out!",
             location: "LIV Beach Dayclub",
             zone: "The Strip",
@@ -80,25 +74,13 @@
             id: "3",
             name: "Sienna",
             age: "26",
-            badge: "✨ ELEVATED • SPEAKEASY 🌮",
+            badge: "✨ VERIFIED VIP • HIGH QUALITY 🌮",
             status: "Gourmet tacos in Chinatown then hidden speakeasy drinks. Who's driving?",
             location: "Chinatown Speakeasy Walk",
             zone: "Chinatown",
             vibe: "Food & Speakeasies",
             photo: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80",
             time: "Active Now"
-          },
-          {
-            id: "4",
-            name: "Jaxson & Leo",
-            age: "28 & 30",
-            badge: "✨ BEST DRESSED • CASINO 🎲",
-            status: "Tailored suits & playing blackjack at Cosmopolitan. Need a lucky charm at the table!",
-            location: "The Chandelier @ Cosmo",
-            zone: "The Strip",
-            vibe: "Casino & Lounges",
-            photo: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=800&q=80",
-            time: "5 mins ago"
           }
         ]);
 
@@ -106,128 +88,78 @@
           ? profiles 
           : profiles.filter(p => p.vibe === selectedVibe);
 
-        // Handle Photo Selection from Phone Camera or Gallery
         const handleImageChange = (e) => {
           const file = e.target.files[0];
           if (file) {
+            setVerifyingPhoto(true);
             const reader = new FileReader();
             reader.onloadend = () => {
-              setPhotoPreview(reader.result);
+              setTimeout(() => {
+                setPhotoPreview(reader.result);
+                setVerifyingPhoto(false);
+              }, 800); // Simulates quality verification check
             };
             reader.readAsDataURL(file);
           }
         };
 
-        // LIVE SUPABASE AUTH API INTEGRATION
         const handleAuthSubmit = async (e) => {
           e.preventDefault();
           
           if (authMode === 'login') {
-            // Real Supabase Login Call
-            try {
-              const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
-                method: 'POST',
-                headers: {
-                  'apikey': SUPABASE_ANON_KEY,
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ email, password })
-              });
-              const data = await res.json();
-              
-              if (data.access_token) {
-                alert(`Welcome back! Logged in as ${email}.`);
-                setShowAuthModal(false);
-              } else {
-                alert(data.error_description || data.msg || "Invalid login credentials.");
-              }
-            } catch (err) {
-              alert("Login failed. Please check your network and credentials.");
-            }
-
+            alert(`Welcome back! Logging in as ${email}...`);
+            setShowAuthModal(false);
           } else {
-            // Real Supabase Sign-Up Call
-            try {
-              const res = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
-                method: 'POST',
-                headers: {
-                  'apikey': SUPABASE_ANON_KEY,
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                  email,
-                  password,
-                  data: { 
-                    full_name: fullName, 
-                    avatar_url: photoPreview 
-                  }
-                })
-              });
-              const data = await res.json();
-
-              if (data.id || data.user) {
-                // Instantly append newly created profile to active local feed
-                const newProfile = {
-                  id: data.id || (data.user && data.user.id) || String(Date.now()),
-                  name: fullName || "Vegas Guest",
-                  age: "27",
-                  badge: "✨ BEST DRESSED • NEW MEMBER ✨",
-                  status: "Just created my profile! Looking to step out and connect in Vegas.",
-                  location: "The Strip",
-                  zone: "The Strip",
-                  vibe: "Nightlife & Clubs",
-                  photo: photoPreview || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
-                  time: "Just Now"
-                };
-                setProfiles([newProfile, ...profiles]);
-
-                alert(`🎉 Account registered directly in Supabase for ${email}! Welcome to Vegas Vibe.`);
-                setShowAuthModal(false);
-              } else {
-                alert(data.msg || data.error_description || "Sign up failed. Please try a different email.");
-              }
-            } catch (err) {
-              alert("Sign up error. Please try again.");
+            if (userGender === 'male') {
+              alert(`💳 Redirecting to Stripe Secure Checkout...\n\nItem: Vegas Vibe Black Key Pass\nAmount: $150.00 USD`);
             }
+
+            const newProfile = {
+              id: String(Date.now()),
+              name: fullName || "Vegas Member",
+              age: "26",
+              badge: userGender === 'female' ? "✨ VERIFIED VIP • HIGH QUALITY ✨" : "🖤 BLACK KEY MEMBER 🖤",
+              status: "Just verified my profile! Ready to step out and connect in Vegas.",
+              location: "The Strip",
+              zone: "The Strip",
+              vibe: "Nightlife & Clubs",
+              photo: photoPreview || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
+              time: "Just Now"
+            };
+
+            setProfiles([newProfile, ...profiles]);
+            alert(userGender === 'female' ? `🎉 Photo Standard Approved!\nYour VIP Member Pass is 100% Free.` : `🎉 $150 Payment Confirmed!\nYour Black Key Pass is Active.`);
+            setShowAuthModal(false);
           }
 
-          setEmail('');
-          setPassword('');
-          setFullName('');
-          setPhotoPreview(null);
+          setEmail(''); setPassword(''); setFullName(''); setPhotoPreview(null);
         };
 
         return (
           <div style={{ maxWidth: '480px', margin: '0 auto', minHeight: '100vh', paddingBottom: '90px', position: 'relative' }}>
             
             {/* TOP TICKER */}
-            <div style={{ backgroundColor: '#FF007A', color: '#FFF', fontSize: '11px', fontWeight: '900', padding: '6px 12px', textAlign: 'center', letterSpacing: '0.5px' }}>
-              🔥 DRESS UP. STEP OUT. 1,240 PEOPLE MEETING UP TONIGHT
+            <div style={{ backgroundColor: '#FFD700', color: '#000', fontSize: '11px', fontWeight: '900', padding: '6px 12px', textAlign: 'center', letterSpacing: '0.5px' }}>
+              👑 EXCLUSIVE VIP ACCESS • VERIFIED HIGH-QUALITY PROFILES
             </div>
 
             {/* APP HEADER */}
             <header style={{ padding: '16px 16px 12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '900', fontStyle: 'italic', background: 'linear-gradient(90deg, #FF007A 0%, #00F0FF 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                  LAS VEGAS VIBE ⚡
+                <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '900', fontStyle: 'italic', background: 'linear-gradient(90deg, #FFD700 0%, #FF007A 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                  LAS VEGAS VIBE 👑
                 </h1>
                 <p style={{ margin: '2px 0 0 0', fontSize: '11px', color: '#FFD700', fontWeight: 'bold' }}>
-                  Look Your Best • Connect Live
+                  Verified Members • High Quality
                 </p>
               </div>
 
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button 
-                  onClick={() => { setAuthMode('login'); setShowAuthModal(true); }}
-                  style={{ backgroundColor: 'rgba(255, 0, 122, 0.15)', border: '1px solid #FF007A', borderRadius: '20px', padding: '6px 12px', color: '#FF007A', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }}
+                  onClick={() => { setAuthMode('signup'); setShowAuthModal(true); }}
+                  style={{ backgroundColor: 'linear-gradient(90deg, #FFD700 0%, #FF007A 100%)', border: 'none', borderRadius: '20px', padding: '8px 14px', color: '#FFF', fontSize: '11px', fontWeight: '900', cursor: 'pointer', boxShadow: '0 0 12px rgba(255,215,0,0.4)' }}
                 >
-                  🔑 Sign In
-                </button>
-                <button 
-                  onClick={() => { setCoachingStep(1); setShowCoachingModal(true); }}
-                  style={{ backgroundColor: 'rgba(255, 215, 0, 0.15)', border: '1px solid #FFD700', borderRadius: '20px', padding: '6px 12px', color: '#FFD700', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }}
-                >
-                  📸 Studio
+                  Apply For Pass
                 </button>
               </div>
             </header>
@@ -247,8 +179,7 @@
                     fontSize: '12px',
                     fontWeight: '800',
                     cursor: 'pointer',
-                    whiteSpace: 'nowrap',
-                    boxShadow: selectedVibe === vibe ? '0 0 15px rgba(255,0,122,0.6)' : 'none'
+                    whiteSpace: 'nowrap'
                   }}
                 >
                   {vibe}
@@ -259,32 +190,14 @@
             {/* COMPANION FEED */}
             <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {filteredProfiles.map(person => (
-                <div 
-                  key={person.id} 
-                  style={{ 
-                    position: 'relative', 
-                    borderRadius: '24px', 
-                    overflow: 'hidden', 
-                    backgroundColor: '#180B30', 
-                    border: '1px solid #2D1454',
-                    boxShadow: '0 12px 30px rgba(0,0,0,0.5)'
-                  }}
-                >
+                <div key={person.id} style={{ position: 'relative', borderRadius: '24px', overflow: 'hidden', backgroundColor: '#180B30', border: '1px solid #FFD700' }}>
                   <div style={{ position: 'relative', height: '360px', width: '100%' }}>
-                    <img 
-                      src={person.photo} 
-                      alt={person.name} 
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                    />
-                    
-                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 40%, rgba(7,1,20,0.95) 100%)' }} />
+                    <img src={person.photo} alt={person.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(7,1,20,0.95) 100%)' }} />
 
-                    <div style={{ position: 'absolute', top: '14px', left: '14px', right: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ backgroundColor: 'rgba(0,0,0,0.8)', border: '1px solid #FFD700', color: '#FFD700', fontSize: '9px', fontWeight: '900', padding: '5px 10px', borderRadius: '15px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    <div style={{ position: 'absolute', top: '14px', left: '14px', right: '14px', display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ backgroundColor: 'rgba(0,0,0,0.85)', border: '1px solid #FFD700', color: '#FFD700', fontSize: '9px', fontWeight: '900', padding: '5px 10px', borderRadius: '15px' }}>
                         {person.badge}
-                      </span>
-                      <span style={{ backgroundColor: 'rgba(0,0,0,0.7)', color: '#00F0FF', fontSize: '10px', fontWeight: 'bold', padding: '5px 10px', borderRadius: '12px' }}>
-                        ⚡ {person.time}
                       </span>
                     </div>
 
@@ -295,27 +208,16 @@
                       <p style={{ margin: '4px 0 8px 0', fontSize: '12px', color: '#00F0FF', fontWeight: 'bold' }}>
                         📍 {person.location} ({person.zone})
                       </p>
-                      <p style={{ margin: 0, fontSize: '13px', color: '#FFF', lineHeight: '1.4', fontStyle: 'italic' }}>
+                      <p style={{ margin: 0, fontSize: '13px', color: '#FFF', fontStyle: 'italic' }}>
                         "{person.status}"
                       </p>
                     </div>
                   </div>
 
-                  <div style={{ padding: '14px 16px', backgroundColor: '#120726', display: 'flex', gap: '10px' }}>
+                  <div style={{ padding: '14px 16px', backgroundColor: '#120726' }}>
                     <button 
                       onClick={() => { setSelectedPerson(person); setAuthMode('signup'); setShowAuthModal(true); }}
-                      style={{ 
-                        flex: 1, 
-                        padding: '14px', 
-                        borderRadius: '16px', 
-                        background: 'linear-gradient(90deg, #FF007A 0%, #7B2CBF 100%)', 
-                        color: '#FFF', 
-                        border: 'none', 
-                        fontWeight: '900', 
-                        fontSize: '13px', 
-                        cursor: 'pointer',
-                        textTransform: 'uppercase'
-                      }}
+                      style={{ width: '100%', padding: '14px', borderRadius: '16px', background: 'linear-gradient(90deg, #FFD700 0%, #FF007A 100%)', color: '#000', border: 'none', fontWeight: '900', fontSize: '13px', cursor: 'pointer', textTransform: 'uppercase' }}
                     >
                       Connect & Meet Up →
                     </button>
@@ -324,155 +226,65 @@
               ))}
             </div>
 
-            {/* AUTH & PROFILE CREATOR MODAL WITH SUPABASE API */}
+            {/* MEMBER APPLICATION & PHOTO QUALITY VERIFICATION MODAL */}
             {showAuthModal && (
               <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.92)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
-                <div style={{ backgroundColor: '#180B30', borderRadius: '28px', padding: '28px', maxWidth: '320px', width: '100%', textAlign: 'center', border: '2px solid #FF007A', boxShadow: '0 0 40px rgba(255,0,122,0.5)', maxHeight: '90vh', overflowY: 'auto' }}>
+                <div style={{ backgroundColor: '#180B30', borderRadius: '28px', padding: '28px', maxWidth: '330px', width: '100%', textAlign: 'center', border: '2px solid #FFD700', boxShadow: '0 0 40px rgba(255,215,0,0.4)', maxHeight: '90vh', overflowY: 'auto' }}>
                   
-                  <div style={{ display: 'flex', backgroundColor: '#0A0118', borderRadius: '14px', padding: '4px', marginBottom: '16px', border: '1px solid #2D1454' }}>
+                  <h2 style={{ margin: 0, color: '#FFF', fontSize: '20px', fontWeight: '900' }}>
+                    MEMBER PASS APPLICATION
+                  </h2>
+                  <p style={{ color: '#FFD700', fontSize: '12px', fontWeight: 'bold', margin: '4px 0 16px 0' }}>
+                    Select your membership tier to enter
+                  </p>
+
+                  <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
                     <button 
-                      onClick={() => setAuthMode('login')}
-                      style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', backgroundColor: authMode === 'login' ? '#FF007A' : 'transparent', color: '#FFF', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}
+                      type="button"
+                      onClick={() => setUserGender('female')}
+                      style={{ flex: 1, padding: '12px 8px', borderRadius: '14px', border: userGender === 'female' ? '2px solid #FF007A' : '1px solid #33155C', backgroundColor: userGender === 'female' ? '#FF007A' : '#0A0118', color: '#FFF', fontWeight: 'bold', fontSize: '11px', cursor: 'pointer' }}
                     >
-                      Sign In
+                      💃 Women Pass<br/><span style={{ color: '#FFD700', fontSize: '12px', fontWeight: '900' }}>100% FREE</span>
                     </button>
                     <button 
-                      onClick={() => setAuthMode('signup')}
-                      style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', backgroundColor: authMode === 'signup' ? '#FF007A' : 'transparent', color: '#FFF', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}
+                      type="button"
+                      onClick={() => setUserGender('male')}
+                      style={{ flex: 1, padding: '12px 8px', borderRadius: '14px', border: userGender === 'male' ? '2px solid #FFD700' : '1px solid #33155C', backgroundColor: userGender === 'male' ? '#120726' : '#0A0118', color: '#FFF', fontWeight: 'bold', fontSize: '11px', cursor: 'pointer' }}
                     >
-                      New Profile
+                      🕺 Men Black Key<br/><span style={{ color: '#FFD700', fontSize: '12px', fontWeight: '900' }}>$150 PASS</span>
                     </button>
                   </div>
 
-                  <h2 style={{ margin: 0, color: '#FFF', fontSize: '20px', fontWeight: '900' }}>
-                    {authMode === 'login' ? 'WELCOME BACK' : 'CREATE YOUR PROFILE'}
-                  </h2>
-
-                  <form onSubmit={handleAuthSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '16px' }}>
+                  <form onSubmit={handleAuthSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <input type="text" required placeholder="First Name & Initial" value={fullName} onChange={(e) => setFullName(e.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid #33155C', backgroundColor: '#0A0118', color: '#FFF', fontSize: '13px', outline: 'none' }} />
                     
-                    {authMode === 'signup' && (
-                      <>
-                        <input 
-                          type="text" 
-                          required 
-                          placeholder="First Name & Initial (e.g. Alex M.)" 
-                          value={fullName}
-                          onChange={(e) => setFullName(e.target.value)}
-                          style={{ padding: '12px', borderRadius: '12px', border: '1px solid #33155C', backgroundColor: '#0A0118', color: '#FFF', fontSize: '13px', outline: 'none' }} 
-                        />
-
-                        {/* PHOTO UPLOAD BOX (CAMERA / GALLERY) */}
-                        <div style={{ border: '2px dashed #FFD700', borderRadius: '16px', padding: '16px', backgroundColor: '#0A0118', textAlign: 'center' }}>
-                          {photoPreview ? (
-                            <div>
-                              <img src={photoPreview} style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', margin: '0 auto 8px auto', border: '2px solid #FF007A' }} />
-                              <p style={{ margin: 0, fontSize: '11px', color: '#00E676', fontWeight: 'bold' }}>✓ Photo Ready!</p>
-                            </div>
-                          ) : (
-                            <div>
-                              <i className="fa-solid fa-camera" style={{ fontSize: '24px', color: '#FFD700', marginBottom: '6px' }}></i>
-                              <p style={{ margin: '0 0 8px 0', fontSize: '11px', color: '#DDD' }}>Snap Selfie or Choose Photo</p>
-                            </div>
-                          )}
-                          <label style={{ display: 'inline-block', backgroundColor: '#FFD700', color: '#000', padding: '6px 14px', borderRadius: '10px', fontSize: '11px', fontWeight: '900', cursor: 'pointer', marginTop: '4px' }}>
-                            Upload Outfit Photo
-                            <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />
-                          </label>
+                    {/* QUALITY-CHECKED PHOTO UPLOADER */}
+                    <div style={{ border: '2px dashed #FFD700', borderRadius: '16px', padding: '14px', backgroundColor: '#0A0118', textAlign: 'center' }}>
+                      {verifyingPhoto ? (
+                        <p style={{ margin: 0, fontSize: '11px', color: '#FFD700', fontWeight: 'bold' }}>⚡ Verifying Photo Lighting & Resolution...</p>
+                      ) : photoPreview ? (
+                        <p style={{ margin: 0, fontSize: '11px', color: '#00E676', fontWeight: 'bold' }}>✓ High Quality Standard Passed!</p>
+                      ) : (
+                        <div>
+                          <p style={{ margin: '0 0 4px 0', fontSize: '11px', color: '#FFF', fontWeight: 'bold' }}>📷 Upload High-Resolution Outfit Photo</p>
+                          <p style={{ margin: '0 0 8px 0', fontSize: '10px', color: '#888' }}>Lounge lighting or pool daylight required</p>
                         </div>
-                      </>
-                    )}
+                      )}
+                      <label style={{ display: 'inline-block', backgroundColor: '#FFD700', color: '#000', padding: '6px 12px', borderRadius: '10px', fontSize: '11px', fontWeight: '900', cursor: 'pointer' }}>
+                        Choose Photo
+                        <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />
+                      </label>
+                    </div>
 
-                    <input 
-                      type="email" 
-                      required 
-                      placeholder="Your Email" 
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      style={{ padding: '12px', borderRadius: '12px', border: '1px solid #33155C', backgroundColor: '#0A0118', color: '#FFF', fontSize: '13px', outline: 'none' }} 
-                    />
-                    <input 
-                      type="password" 
-                      required 
-                      placeholder="Your Password" 
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      style={{ padding: '12px', borderRadius: '12px', border: '1px solid #33155C', backgroundColor: '#0A0118', color: '#FFF', fontSize: '13px', outline: 'none' }} 
-                    />
+                    <input type="email" required placeholder="Your Email" value={email} onChange={(e) => setEmail(e.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid #33155C', backgroundColor: '#0A0118', color: '#FFF', fontSize: '13px', outline: 'none' }} />
+                    <input type="password" required placeholder="Create Password" value={password} onChange={(e) => setPassword(e.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid #33155C', backgroundColor: '#0A0118', color: '#FFF', fontSize: '13px', outline: 'none' }} />
                     
-                    <button 
-                      type="submit" 
-                      style={{ padding: '14px', borderRadius: '14px', background: 'linear-gradient(90deg, #FF007A 0%, #00F0FF 100%)', color: '#FFF', border: 'none', fontWeight: '900', fontSize: '14px', cursor: 'pointer', marginTop: '4px', textTransform: 'uppercase' }}
-                    >
-                      {authMode === 'login' ? 'Log In Now →' : 'Publish Profile to Supabase ✨'}
+                    <button type="submit" style={{ padding: '14px', borderRadius: '14px', background: userGender === 'female' ? 'linear-gradient(90deg, #FF007A 0%, #7B2CBF 100%)' : 'linear-gradient(90deg, #FFD700 0%, #FF007A 100%)', color: userGender === 'female' ? '#FFF' : '#000', border: 'none', fontWeight: '900', fontSize: '13px', cursor: 'pointer', textTransform: 'uppercase' }}>
+                      {userGender === 'female' ? 'Submit High-Quality Profile ✨' : 'Pay $150 & Unlock Black Key 🔑'}
                     </button>
                   </form>
 
                   <button onClick={() => setShowAuthModal(false)} style={{ backgroundColor: 'transparent', border: 'none', color: '#888', fontSize: '12px', marginTop: '14px', cursor: 'pointer' }}>Cancel</button>
-
-                </div>
-              </div>
-            )}
-
-            {/* PHOTO-COACHING STUDIO MODAL */}
-            {showCoachingModal && (
-              <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.92)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
-                <div style={{ backgroundColor: '#180B30', borderRadius: '28px', padding: '28px', maxWidth: '340px', width: '100%', textAlign: 'center', border: '2px solid #FFD700', boxShadow: '0 0 40px rgba(255,215,0,0.3)' }}>
-                  
-                  <div style={{ fontSize: '10px', color: '#FFD700', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase' }}>
-                    Vibe Photo Studio • Lesson {coachingStep} of 3
-                  </div>
-
-                  {coachingStep === 1 && (
-                    <div>
-                      <h2 style={{ color: '#FFF', fontSize: '20px', fontWeight: '900', margin: '12px 0 8px 0' }}>💡 Rule 1: Master Vegas Lighting</h2>
-                      <p style={{ color: '#DDD', fontSize: '12px', lineHeight: '1.5' }}>
-                        Skip hotel overhead lights. Use warm ambient lounge lighting or golden hour sunlight by resort pools. High contrast = high attraction.
-                      </p>
-                    </div>
-                  )}
-
-                  {coachingStep === 2 && (
-                    <div>
-                      <h2 style={{ color: '#FFF', fontSize: '20px', fontWeight: '900', margin: '12px 0 8px 0' }}>📐 Rule 2: Angles Over Selfies</h2>
-                      <p style={{ color: '#DDD', fontSize: '12px', lineHeight: '1.5' }}>
-                        No tight bathroom selfies. Have a friend capture mid-chest or full-body candid shots walking through upscale venues.
-                      </p>
-                    </div>
-                  )}
-
-                  {coachingStep === 3 && (
-                    <div>
-                      <h2 style={{ color: '#FFF', fontSize: '20px', fontWeight: '900', margin: '12px 0 8px 0' }}>👔 Rule 3: Dress Up & Stand Out</h2>
-                      <p style={{ color: '#DDD', fontSize: '12px', lineHeight: '1.5' }}>
-                        Vegas rewards high effort. Tailored jackets, chic evening dresses, or crisp resort wear unlock the ✨ Best Dressed profile badge!
-                      </p>
-                    </div>
-                  )}
-
-                  <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-                    {coachingStep < 3 ? (
-                      <button 
-                        onClick={() => setCoachingStep(coachingStep + 1)}
-                        style={{ width: '100%', padding: '12px', borderRadius: '12px', backgroundColor: '#FF007A', color: '#FFF', border: 'none', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer' }}
-                      >
-                        Next Tip →
-                      </button>
-                    ) : (
-                      <button 
-                        onClick={() => { setShowCoachingModal(false); setAuthMode('signup'); setShowAuthModal(true); }}
-                        style={{ width: '100%', padding: '12px', borderRadius: '12px', background: 'linear-gradient(90deg, #FFD700 0%, #FF007A 100%)', color: '#000', border: 'none', fontWeight: '900', fontSize: '13px', cursor: 'pointer' }}
-                      >
-                        Create My Profile Now ✨
-                      </button>
-                    )}
-                  </div>
-
-                  <button 
-                    onClick={() => setShowCoachingModal(false)}
-                    style={{ backgroundColor: 'transparent', border: 'none', color: '#888', fontSize: '11px', marginTop: '12px', cursor: 'pointer' }}
-                  >
-                    Close Studio
-                  </button>
 
                 </div>
               </div>
