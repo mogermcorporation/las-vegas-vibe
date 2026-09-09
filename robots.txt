@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://las-vegas-vibe.vercel.app/sitemap.xml
